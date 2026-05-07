@@ -1,35 +1,35 @@
 # MyCompanion 🐶
 
-MyCompanion은 macOS 바탕화면 위에 귀여운 강아지를 띄워놓고 상호작용할 수 있는 데스크탑 펫 애플리케이션입니다. 
+MyCompanion is a desktop pet application that displays a cute dog on your macOS desktop for you to interact with.
 
-## ✨ 주요 기능 (구현됨)
-- **Always on Top**: 화면의 최상단에 투명한 배경으로 펫이 표시됩니다.
-- **상호작용**: 
-  - 클릭(쓰다듬기)하여 행복도를 높일 수 있습니다.
-  - 마우스 우클릭 메뉴를 통해 밥을 줄 수 있습니다.
-  - 마우스로 드래그하여 화면 이리저리로 이동시킬 수 있습니다.
-- **상태 변화**: 시간이 지남에 따라 배가 고파지고, 상태(대기, 걷기, 밥 먹기, 잠자기 등)가 변합니다.
-- **데이터 저장**: 앱을 종료해도 펫의 상태(배고픔, 위치 등)가 기억됩니다.
+## ✨ Key Features (Implemented)
+- **Always on Top**: The pet is displayed with a transparent background on top of all other windows.
+- **Interactions**: 
+  - Hover and move the mouse over the pet to pet it, increasing its happiness.
+  - Left or right click the pet to open a context menu (e.g., to feed it).
+  - Drag the pet with your mouse to move it around the screen.
+- **State Changes**: Over time, the pet gets hungry and changes its state (idle, walking, eating, sleeping, etc.).
+- **Data Persistence**: The application remembers the pet's state (hunger, position, etc.) even after it is closed.
 
-## 🛠️ 기술 스택
+## 🛠️ Tech Stack
 - **Language**: Python 3
-- **GUI Framework**: PyQt6 / PySide6 (예정)
-- **Architecture**: UI 로직과 상태(State) 로직의 분리 (자세한 사항은 `GEMINI.md` 참고)
+- **GUI Framework**: PyQt6 / PySide6 (Planned)
+- **Architecture**: Separation of UI logic and state logic (see `GEMINI.md` for details)
 
-## 📁 프로젝트 구조
-- `env/`: 코어 상태 변화 및 상호작용 로직
-- `ui/`: 화면 렌더링, 애니메이션, 트레이 아이콘 등 UI 관련 로직
-- `assets/`: 스프라이트 이미지, GIF, 아이콘 등 리소스 파일
-- `configs/`: 설정값 및 기본값 관리
-- `utils/`: 공통 헬퍼 함수
+## 📁 Project Structure
+- `env/`: Core state transition and interaction logic
+- `ui/`: UI-related logic such as rendering, animation, and tray icon
+- `assets/`: Resource files including sprite images, GIFs, and icons
+- `configs/`: Settings and defaults management
+- `utils/`: Common helper functions
 
-## 🚀 시작하기
-가상환경을 활성화하고 메인 스크립트를 실행합니다:
+## 🚀 Getting Started
+Activate the virtual environment and run the main script:
 
 ```bash
 source .venv/bin/activate
 python3 main.py
 ```
 
-## 📝 개발 일지
-자세한 개발 내역과 일별 작업은 [devlog.md](./devlog.md) 파일에서 확인할 수 있습니다.
+## 📝 Development Log
+Detailed development history and daily tasks can be found in the [devlog.md](./devlog.md) file.

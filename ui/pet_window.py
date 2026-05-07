@@ -1,7 +1,8 @@
 import sys
+import os
 from PySide6.QtWidgets import QApplication, QLabel, QWidget, QMenu
 from PySide6.QtCore import Qt, QTimer, QSize
-from PySide6.QtGui import QMovie, QAction
+from PySide6.QtGui import QMovie, QAction, QCursor, QPixmap
 
 class PetWindow(QWidget):
     def __init__(self):
@@ -18,6 +19,7 @@ class PetWindow(QWidget):
         # 2. Setup Label for the GIF
         self.label = QLabel(self)
         self.label.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         
         # 3. Load GIFs and Scale them down by 50%
         self.idle_movie = self.load_scaled_movie('assets/idle.gif')
@@ -27,6 +29,13 @@ class PetWindow(QWidget):
         self.current_movie = self.idle_movie
         self.label.setMovie(self.current_movie)
         self.current_movie.start()
+        
+        # Enable mouse tracking for hover events
+        self.setMouseTracking(True)
+        self.label.setMouseTracking(True)
+        
+        if self.underMouse():
+            self.set_hover_cursor()
         
         # 4. Adjust window size to fit the scaled GIF
         self.label.adjustSize()
@@ -43,9 +52,7 @@ class PetWindow(QWidget):
         self.interaction_timer.setSingleShot(True)
         self.interaction_timer.timeout.connect(self.return_to_idle)
         
-        # 6. Setup Context Menu for right-click
-        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.customContextMenuRequested.connect(self.show_context_menu)
+        # 6. Context Menu policy (Menu shown on left/right click release)
 
     def load_scaled_movie(self, path):
         movie = QMovie(path)
@@ -74,21 +81,31 @@ class PetWindow(QWidget):
         self.move(x, y)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            # 1. Start petting interaction on click
-            if not self.is_interacting:
-                self.start_interaction(self.petting_movie, 3000) # Play petting for 3 seconds
-                
-            # 2. Handle drag start
+        if event.button() in (Qt.MouseButton.LeftButton, Qt.MouseButton.RightButton):
             self.drag_start_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            self.has_dragged = False
             event.accept()
 
     def mouseMoveEvent(self, event):
         # Handle window movement during drag
-        if event.buttons() == Qt.MouseButton.LeftButton and self.drag_start_pos:
+        if (event.buttons() & (Qt.MouseButton.LeftButton | Qt.MouseButton.RightButton)) and getattr(self, 'drag_start_pos', None):
             self.move(event.globalPosition().toPoint() - self.drag_start_pos)
+            self.has_dragged = True
+            event.accept()
+        elif not event.buttons():
+            # Mouse moving over without buttons triggers petting
+            if not self.is_interacting:
+                self.start_interaction(self.petting_movie, 3000)
             event.accept()
             
+    def mouseReleaseEvent(self, event):
+        if event.button() in (Qt.MouseButton.LeftButton, Qt.MouseButton.RightButton):
+            if not getattr(self, 'has_dragged', False):
+                self.show_context_menu(event.position().toPoint())
+            self.has_dragged = False
+            self.drag_start_pos = None
+        super().mouseReleaseEvent(event)
+
     def show_context_menu(self, pos):
         menu = QMenu(self)
         
@@ -109,11 +126,17 @@ class PetWindow(QWidget):
 
     def start_interaction(self, new_movie, duration_ms):
         self.is_interacting = True
+        
         self.current_movie.stop()
         
         self.current_movie = new_movie
         self.label.setMovie(self.current_movie)
         self.current_movie.start()
+        
+        # Enable mouse tracking for hover events
+        self.setMouseTracking(True)
+        self.label.setMouseTracking(True)
+        
         
         # Start timer to revert back to idle state
         self.interaction_timer.start(duration_ms)
@@ -125,3 +148,30 @@ class PetWindow(QWidget):
         self.current_movie = self.idle_movie
         self.label.setMovie(self.current_movie)
         self.current_movie.start()
+        
+        # Enable mouse tracking for hover events
+        self.setMouseTracking(True)
+        self.label.setMouseTracking(True)
+        
+        if self.underMouse():
+            self.set_hover_cursor()
+
+    def set_hover_cursor(self):
+        cursor_path = 'assets/cursor_petting.png'
+        if os.path.exists(cursor_path):
+            custom_cursor = QCursor(QPixmap(cursor_path))
+            self.setCursor(custom_cursor)
+            self.label.setCursor(custom_cursor)
+        else:
+            self.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.label.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    def enterEvent(self, event):
+        if not self.is_interacting:
+            self.set_hover_cursor()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        super().leaveEvent(event)
+        self.setCursor(Qt.CursorShape.ArrowCursor)
+        self.label.setCursor(Qt.CursorShape.ArrowCursor)
